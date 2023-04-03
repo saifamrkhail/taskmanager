@@ -1,0 +1,26 @@
+version: '3'
+services:
+  db:
+    image: postgres:13
+    volumes:
+      - sample_db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=sample
+      - POSTGRES_USER=sample
+      - POSTGRES_DB=sample
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    ports:
+      - 5432:5432
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 8080:8080
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/sample
+      - SPRING_DATASOURCE_USERNAME=sample
+      - SPRING_DATASOURCE_PASSWORD=sample
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+volumes:
+  sample_db: {}
