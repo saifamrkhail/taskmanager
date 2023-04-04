@@ -10,13 +10,14 @@ services:
       - POSTGRES_DB=sample
       - PGDATA=/var/lib/postgresql/data/pgdata
     ports:
-      - 5432:5432
+      - "5432:5432"
   app:
     build:
       context: .
       dockerfile: Dockerfile
     ports:
-      - 8080:8080
+      - "8080:8080"
+      - "5005:5005"
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/sample
       - SPRING_DATASOURCE_USERNAME=sample

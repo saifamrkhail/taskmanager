@@ -6,4 +6,4 @@ COPY target/$JAR /app/taskmanager.jar
 
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-jar", "taskmanager.jar"]
+ENTRYPOINT ["java", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005", "-jar", "taskmanager.jar"]

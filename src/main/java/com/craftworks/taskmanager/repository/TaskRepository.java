@@ -10,32 +10,13 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface TaskRepository extends JpaRepository<Task, UUID> {
-    /**
-     * Find all tasks ordered by created date
-     * @return
-     */
-    List<Task> findAll(Task task, Sort sort);
+public interface TaskRepository extends JpaRepository<Task, Long> {
 
-    /**
-     * Find task by id
-     * @param id
-     * @return
-     */
-    Optional<Task> findById(UUID id);
+    List<Task> findAll(Sort sort);
 
-    Task create(Task task);
+    Optional<Task> findById(Long id);
 
-    /**
-     * Update task by id
-     * @param id
-     * @return
-     */
-    Task save(Task task);
+    <S extends Task> S save(S task);
 
-    /**
-     * Delete task by id
-     * @param id
-     */
-    void deleteById(UUID id);
+    void deleteById(Long id);
 }

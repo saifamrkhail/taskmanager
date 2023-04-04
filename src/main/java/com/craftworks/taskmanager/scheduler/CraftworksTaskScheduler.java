@@ -2,6 +2,8 @@ package com.craftworks.taskmanager.scheduler;
 
 import com.craftworks.taskmanager.entity.Task;
 import com.craftworks.taskmanager.repository.TaskRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -11,12 +13,15 @@ import java.time.LocalDateTime;
 import java.util.Random;
 
 @Component
-public class TaskScheduler {
+public class CraftworksTaskScheduler {
+
+    private final Logger logger = LoggerFactory.getLogger(CraftworksTaskScheduler.class);
 
     private final TaskRepository taskRepository;
 
+
     @Autowired
-    public TaskScheduler(TaskRepository taskRepository) {
+    public CraftworksTaskScheduler(TaskRepository taskRepository) {
         this.taskRepository = taskRepository;
     }
 
@@ -32,6 +37,7 @@ public class TaskScheduler {
         task.setDescription("This is a sample task");
         task.setPriority(random.nextInt(5) + 1);
         task.setStatus("Open");
-        taskRepository.create(task);
+        //taskRepository.save(task);
+        logger.info("Created task: {}", task);
     }
 }

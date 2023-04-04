@@ -22,3 +22,18 @@ docker-compose up -d
 This will start both the app and db services and connect them together.
 Access the application by navigating to http://localhost:8080 in your web browser. You should see the home page of your application.
 That's it! You now have a fully functioning Spring Boot application with a PostgreSQL database running in Docker Compose.
+
+## Docker Compose
+
+```bash
+docker-compose up -d
+```
+
+```bash
+docker-compose down
+```
+## PostgreSQL
+
+```bash
+psql -h localhost -p 5432 -U sample -d sample
+```
