@@ -1,5 +1,7 @@
 package com.craftworks.taskmanager.entity;
 
+import com.craftworks.taskmanager.enumeration.Priority;
+import com.craftworks.taskmanager.enumeration.Status;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -38,8 +40,10 @@ public class Task {
     private String description;
 
     @Column(name = "priority")
-    private Integer priority;
+    @Enumerated(EnumType.STRING)
+    private Priority priority;
 
     @Column(name = "status")
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private Status status;
 }

@@ -1,6 +1,8 @@
 package com.craftworks.taskmanager.scheduler;
 
 import com.craftworks.taskmanager.entity.Task;
+import com.craftworks.taskmanager.enumeration.Priority;
+import com.craftworks.taskmanager.enumeration.Status;
 import com.craftworks.taskmanager.repository.TaskRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +21,6 @@ public class CraftworksTaskScheduler {
 
     private final TaskRepository taskRepository;
 
-
     @Autowired
     public CraftworksTaskScheduler(TaskRepository taskRepository) {
         this.taskRepository = taskRepository;
@@ -35,9 +36,9 @@ public class CraftworksTaskScheduler {
         task.setDueDate(LocalDate.now().plusDays(random.nextInt(7)));
         task.setTitle("Sample task");
         task.setDescription("This is a sample task");
-        task.setPriority(random.nextInt(5) + 1);
-        task.setStatus("Open");
-        //taskRepository.save(task);
+        task.setPriority(Priority.LOW);
+        task.setStatus(Status.IN_PROGRESS);
+        taskRepository.save(task);
         logger.info("Created task: {}", task);
     }
 }

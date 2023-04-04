@@ -1,44 +1,82 @@
 package com.craftworks.taskmanager.controller;
 
-import com.craftworks.taskmanager.entity.Task;
+import com.craftworks.taskmanager.dto.CreateTaskDto;
+import com.craftworks.taskmanager.dto.UpdateTaskDto;
 import com.craftworks.taskmanager.service.TaskService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.CollectionUtils;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/tasks")
 public class TaskController {
 
     private final TaskService taskService;
-    @Autowired
-    TaskController(TaskService taskService) {
+
+    public TaskController(TaskService taskService) {
         this.taskService = taskService;
     }
+
     @GetMapping
-    public List<Task> getAllTasks() {
-        return taskService.getAllTasks();
+    public ResponseEntity<List<UpdateTaskDto>> getAllTasks() {
+        List<UpdateTaskDto> taskDtos = taskService.getAllTasks();
+        if (CollectionUtils.isEmpty(taskDtos)) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(taskDtos);
     }
 
-    @GetMapping("/{id}")
-    public Optional<Task> getTaskById(@PathVariable Long id) {
-        return taskService.getTaskById(id);
+    @GetMapping("/{taskId}")
+    public ResponseEntity<UpdateTaskDto> getTask(@PathVariable @NotNull Long taskId,
+                                                 BindingResult bindingResult,
+                                                 UriComponentsBuilder uriBuilder) {
+        if (bindingResult.hasErrors()) {
+            // Handle validation errors and return error response
+            return ResponseEntity.badRequest().build();
+        }
+        return taskService.getTaskById(taskId, uriBuilder);
     }
 
     @PostMapping
-    public Task createTask(@RequestBody Task task) {
-        return taskService.createTask(task);
+    public ResponseEntity<UpdateTaskDto> createTask(@RequestBody @Valid CreateTaskDto taskDto,
+                                                    BindingResult bindingResult,
+                                                    UriComponentsBuilder uriBuilder) {
+
+        if (bindingResult.hasErrors()) {
+            // Handle validation errors and return error response
+            return ResponseEntity.badRequest().build();
+        }
+
+        return taskService.createTask(taskDto, uriBuilder);
     }
 
-    @PutMapping("/{id}")
-    public Optional<Task> updateTask(@PathVariable Long id, @RequestBody Task task) {
-        return taskService.updateTask(id, task);
+    @PutMapping("/{taskId}")
+    public ResponseEntity<UpdateTaskDto> updateTask(@PathVariable @NotNull Long taskId,
+                                                    @RequestBody @Valid UpdateTaskDto taskDto,
+                                                    BindingResult bindingResult,
+                                                    UriComponentsBuilder uriBuilder) {
+        if (bindingResult.hasErrors()) {
+            // Handle validation errors and return error response
+            return ResponseEntity.badRequest().build();
+        }
+
+        return taskService.updateTask(taskId, taskDto, uriBuilder);
     }
 
-    @DeleteMapping("/{id}")
-    public void deleteTask(@PathVariable Long id) {
-        taskService.deleteTask(id);
+    @DeleteMapping("/{taskId}")
+    public ResponseEntity<Void> deleteTask(@PathVariable @NotNull Long taskId,
+                                           BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            // Handle validation errors and return error response
+            return ResponseEntity.badRequest().build();
+        }
+        taskService.deleteTask(taskId);
+        return ResponseEntity.noContent().build();
     }
 }
