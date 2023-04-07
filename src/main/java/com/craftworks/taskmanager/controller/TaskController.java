@@ -17,7 +17,9 @@ import org.springframework.web.util.UriComponentsBuilder;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.net.URI;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/tasks")
@@ -30,12 +32,26 @@ public class TaskController {
     }
 
     @GetMapping
+    public ResponseEntity<Map<String, String>> home() {
+        logger.info("Received request to get home page");
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Welcome to Craftworks Task Manager");
+        response.put("getAllTasks", "/tasks");
+        logger.info("Returning home page");
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/getAllTasks")
     public ResponseEntity<List<UpdateTaskDto>> getAllTasks() {
-        List<UpdateTaskDto> taskDtos = taskService.getAllTasks();
-        if (CollectionUtils.isEmpty(taskDtos)) {
-            return ResponseEntity.noContent().build();
+        logger.info("Received request to get all tasks");
+        try {
+            List<UpdateTaskDto> taskDtos = taskService.getAllTasks();
+            logger.info("Returning all tasks");
+            return ResponseEntity.ok(taskDtos);
+        } catch (TaskAccessException ex) {
+            logger.error("Error occurred while getting all tasks: {}", ex.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-        return ResponseEntity.ok(taskDtos);
     }
 
     @GetMapping("/{taskId}")

@@ -20,6 +20,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -36,12 +37,19 @@ public class TaskService {
     }
 
     public List<UpdateTaskDto> getAllTasks() {
-        List<Task> tasks = taskRepository.findAll();
-        if (CollectionUtils.isEmpty(tasks)) {
-            logger.info("Tasks not found");
-            return null;
+        try {
+            Optional<List<Task>> tasks = Optional.of(taskRepository.findAll());
+            logger.info("Retrieving all tasks");
+            return tasks.get().stream()
+                    .map(taskMapper::toUpdateDto)
+                    .collect(Collectors.toList());
+        } catch (DataAccessException ex) {
+            logger.error("A DataAccessException occurred while getting all tasks: {}", ex.getMessage());
+            throw new TaskAccessException("Failed to get all tasks", HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (Exception ex) {
+            logger.error("Error occurred while getting all tasks: {}", ex.getMessage());
+            throw new RuntimeException(ex.getMessage());
         }
-        return tasks.stream().map(taskMapper::toUpdateDto).collect(Collectors.toList());
     }
 
     public ResponseEntity<UpdateTaskDto> getTaskById(Long taskId, UriComponentsBuilder uriBuilder) {
