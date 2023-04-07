@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -64,18 +65,19 @@ public class TaskService {
         }
     }
 
-    public ResponseEntity<UpdateTaskDto> createTask(CreateTaskDto taskDto, UriComponentsBuilder uriBuilder) {
-        UpdateTaskDto createdTaskDto = null;
+    public UpdateTaskDto createTask(CreateTaskDto taskDto) {
+        UpdateTaskDto createdTaskDto;
         try {
             Task task = taskRepository.save(taskMapper.createTaskDtoToEntity(taskDto, new Task()));
             createdTaskDto = taskMapper.toUpdateDto(task);
-
-            URI location = uriBuilder.path("/tasks/{taskId}").buildAndExpand(createdTaskDto.getId()).toUri();
-            return ResponseEntity.created(location).body(createdTaskDto);
-
+            logger.info("Created task: {}", createdTaskDto);
+            return createdTaskDto;
+        } catch (DataAccessException ex) {
+            logger.error("A DataAccessException occurred while creating task: {}", ex.getMessage());
+            throw new TaskAccessException(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (Exception ex) {
-            logger.error("An error occurred while saving task: " + ex.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(createdTaskDto);
+            logger.error("An error occurred while creating task: " + ex.getMessage());
+            throw new RuntimeException(ex.getMessage());
         }
     }
 
@@ -92,8 +94,8 @@ public class TaskService {
             UpdateTaskDto updatedTaskDto = taskMapper.toUpdateDto(task);
             logger.info("Updated task with id: {}", taskId);
             return updatedTaskDto;
-        }  catch (DataAccessException ex) {
-            logger.error("An error occurred while updating task: {}", ex.getMessage());
+        } catch (DataAccessException ex) {
+            logger.error("A DataAccessException occurred while updating task: {}", ex.getMessage());
             throw new TaskAccessException(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (Exception ex) {
             logger.error("An error occurred while updating task: {}", ex.getMessage());

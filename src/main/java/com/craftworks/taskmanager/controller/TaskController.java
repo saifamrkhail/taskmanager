@@ -53,13 +53,21 @@ public class TaskController {
     public ResponseEntity<UpdateTaskDto> createTask(@RequestBody @Valid CreateTaskDto taskDto,
                                                     BindingResult bindingResult,
                                                     UriComponentsBuilder uriBuilder) {
-
+        logger.info("Received request to create Task with id: {}", taskDto);
+        // Handle validation errors and return error response
         if (bindingResult.hasErrors()) {
-            // Handle validation errors and return error response
+            logger.error("Validation errors occurred while updating task: {}", taskDto);
             return ResponseEntity.badRequest().build();
         }
 
-        return taskService.createTask(taskDto, uriBuilder);
+        try {
+            UpdateTaskDto createdTaskDto = taskService.createTask(taskDto);
+            URI location = uriBuilder.path("/tasks/{taskId}").buildAndExpand(createdTaskDto.getId()).toUri();
+            logger.info("Returning created Task: {}", createdTaskDto);
+            return ResponseEntity.status(HttpStatus.CREATED).location(location).body(createdTaskDto);
+        }  catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @PutMapping("/{taskId}")
@@ -70,14 +78,14 @@ public class TaskController {
         logger.info("Received request to update Task with id: {}", taskId);
         //handle validation errors and return error response
         if (bindingResult.hasErrors()) {
-            logger.error("Validation errors occurred while updating task with id: {}", taskId);
+            logger.error("Validation errors occurred while updating task: {}", taskDto);
             return ResponseEntity.badRequest().build();
         }
 
         try {
             UpdateTaskDto taskDtoResponse = taskService.updateTask(taskId, taskDto);
             URI uri = uriBuilder.path("/tasks/{taskId}").buildAndExpand(taskDtoResponse.getId()).toUri();
-            logger.info("Returning updated Task with id: {}", taskId);
+            logger.info("Returning updated Task: {}", taskDtoResponse);
             return ResponseEntity.ok().location(uri).body(taskDtoResponse);
         } catch (TaskNotFoundException ex) {
             return ResponseEntity.notFound().build();
