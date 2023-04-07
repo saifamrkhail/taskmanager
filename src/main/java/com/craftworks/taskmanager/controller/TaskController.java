@@ -122,11 +122,20 @@ public class TaskController {
     @DeleteMapping("/delete/{taskId}")
     public ResponseEntity<Void> deleteTask(@PathVariable @NotNull Long taskId,
                                            BindingResult bindingResult) {
+        logger.info("Received request to delete Task with id: {}", taskId);
+        // Handle validation errors and return error response
         if (bindingResult.hasErrors()) {
-            // Handle validation errors and return error response
             return ResponseEntity.badRequest().build();
         }
-        taskService.deleteTask(taskId);
-        return ResponseEntity.noContent().build();
+
+        try {
+            taskService.deleteTask(taskId);
+            logger.info("Task with id: {} deleted successfully", taskId);
+            return ResponseEntity.ok().build();
+        } catch (TaskNotFoundException ex) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 }

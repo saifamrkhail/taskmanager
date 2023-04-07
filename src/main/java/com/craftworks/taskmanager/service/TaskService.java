@@ -7,20 +7,15 @@ import com.craftworks.taskmanager.exception.TaskAccessException;
 import com.craftworks.taskmanager.exception.TaskNotFoundException;
 import com.craftworks.taskmanager.mapper.TaskMapper;
 import com.craftworks.taskmanager.repository.TaskRepository;
-import com.craftworks.taskmanager.scheduler.CraftworksTaskScheduler;
+import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
-import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -30,6 +25,7 @@ public class TaskService {
     private final Logger logger = LoggerFactory.getLogger(TaskService.class);
     private final TaskRepository taskRepository;
     private final TaskMapper taskMapper;
+
     @Autowired
     public TaskService(TaskRepository taskRepository, TaskMapper taskMapper) {
         this.taskRepository = taskRepository;
@@ -57,7 +53,7 @@ public class TaskService {
             Optional<Task> task = taskRepository.findById(taskId);
             if (task.isPresent()) {
                 logger.info("Task found with id: {}", taskId);
-               return taskMapper.toUpdateDto(task.get());
+                return taskMapper.toUpdateDto(task.get());
             } else {
                 logger.info("Task with id {} not found", taskId);
                 throw new TaskNotFoundException("Task with id:" + taskId + "not found", HttpStatus.NOT_FOUND);
@@ -110,7 +106,18 @@ public class TaskService {
     }
 
     public void deleteTask(Long taskId) {
-        taskRepository.deleteById(taskId);
-        logger.info("Deleted task with id: {}", taskId);
+        try {
+            taskRepository.deleteById(taskId);
+            logger.info("Deleted task with id: {}", taskId);
+        } catch (EmptyResultDataAccessException e) {
+            logger.error("Task not found with id: {}", taskId);
+            throw new EntityNotFoundException("Task not found with id " + taskId);
+        } catch (DataAccessException e) {
+            logger.error("A DataAccessException error occurred while deleting task with id: {}", taskId);
+            throw new TaskAccessException("An error occurred while deleting task with id: " + taskId, HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (Exception e) {
+            logger.error("An error occurred while deleting task with id: {}", taskId);
+            throw new RuntimeException(e.getMessage());
+        }
     }
 }
