@@ -52,24 +52,22 @@ public class TaskService {
         }
     }
 
-    public ResponseEntity<UpdateTaskDto> getTaskById(Long taskId, UriComponentsBuilder uriBuilder) {
-        UpdateTaskDto foundTaskDto = null;
+    public UpdateTaskDto getTaskById(Long taskId) {
         try {
-            Optional<Task> optionalTask = taskRepository.findById(taskId);
-            if (optionalTask.isPresent()) {
-                foundTaskDto = taskMapper.toUpdateDto(optionalTask.get());
-                URI uri = uriBuilder.path("/tasks/{taskId}").buildAndExpand(foundTaskDto.getId()).toUri();
-                logger.info("Found task with id: {}", taskId);
-                return ResponseEntity.ok().location(uri).body(foundTaskDto);
-
-
+            Optional<Task> task = taskRepository.findById(taskId);
+            if (task.isPresent()) {
+                logger.info("Task found with id: {}", taskId);
+               return taskMapper.toUpdateDto(task.get());
             } else {
-                logger.info("Task not found");
-                return ResponseEntity.notFound().build();
+                logger.info("Task with id {} not found", taskId);
+                throw new TaskNotFoundException("Task with id:" + taskId + "not found", HttpStatus.NOT_FOUND);
             }
+        } catch (DataAccessException ex) {
+            logger.error("A DataAccessException occurred while creating task: {}", ex.getMessage());
+            throw new TaskAccessException(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (Exception ex) {
-            logger.error("An error occurred while fetching task: " + ex.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(foundTaskDto);
+            logger.error("An error occurred while retrieving task with id: {} {}", taskId, ex.getMessage());
+            throw new RuntimeException(ex.getMessage());
         }
     }
 
@@ -84,7 +82,7 @@ public class TaskService {
             logger.error("A DataAccessException occurred while creating task: {}", ex.getMessage());
             throw new TaskAccessException(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (Exception ex) {
-            logger.error("An error occurred while creating task: " + ex.getMessage());
+            logger.error("An error occurred while creating task: {} ", ex.getMessage());
             throw new RuntimeException(ex.getMessage());
         }
     }

@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -22,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/tasks")
+@RequestMapping("/task")
 public class TaskController {
     private final Logger logger = LoggerFactory.getLogger(TaskController.class);
     private final TaskService taskService;
@@ -41,7 +40,7 @@ public class TaskController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/getAllTasks")
+    @GetMapping("/all")
     public ResponseEntity<List<UpdateTaskDto>> getAllTasks() {
         logger.info("Received request to get all tasks");
         try {
@@ -58,14 +57,24 @@ public class TaskController {
     public ResponseEntity<UpdateTaskDto> getTask(@PathVariable @NotNull Long taskId,
                                                  BindingResult bindingResult,
                                                  UriComponentsBuilder uriBuilder) {
+        logger.info("Received request to get Task with id: {}", taskId);
         if (bindingResult.hasErrors()) {
             // Handle validation errors and return error response
             return ResponseEntity.badRequest().build();
         }
-        return taskService.getTaskById(taskId, uriBuilder);
+        try {
+            UpdateTaskDto taskDto = taskService.getTaskById(taskId);
+            logger.info("Returning Task: {}", taskDto);
+            URI uri = uriBuilder.path("/task/{taskId}").buildAndExpand(taskDto.getId()).toUri();
+            return ResponseEntity.ok().location(uri).body(taskDto);
+        } catch (TaskNotFoundException ex) {
+            return ResponseEntity.notFound().build();
+        }  catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
-    @PostMapping
+    @PostMapping("/create")
     public ResponseEntity<UpdateTaskDto> createTask(@RequestBody @Valid CreateTaskDto taskDto,
                                                     BindingResult bindingResult,
                                                     UriComponentsBuilder uriBuilder) {
@@ -78,15 +87,15 @@ public class TaskController {
 
         try {
             UpdateTaskDto createdTaskDto = taskService.createTask(taskDto);
-            URI location = uriBuilder.path("/tasks/{taskId}").buildAndExpand(createdTaskDto.getId()).toUri();
+            URI location = uriBuilder.path("/task/{taskId}").buildAndExpand(createdTaskDto.getId()).toUri();
             logger.info("Returning created Task: {}", createdTaskDto);
             return ResponseEntity.status(HttpStatus.CREATED).location(location).body(createdTaskDto);
-        }  catch (Exception ex) {
+        } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
-    @PutMapping("/{taskId}")
+    @PutMapping("/update/{taskId}")
     public ResponseEntity<UpdateTaskDto> updateTask(@PathVariable @NotNull Long taskId,
                                                     @RequestBody @Valid UpdateTaskDto taskDto,
                                                     BindingResult bindingResult,
@@ -100,7 +109,7 @@ public class TaskController {
 
         try {
             UpdateTaskDto taskDtoResponse = taskService.updateTask(taskId, taskDto);
-            URI uri = uriBuilder.path("/tasks/{taskId}").buildAndExpand(taskDtoResponse.getId()).toUri();
+            URI uri = uriBuilder.path("/task/{taskId}").buildAndExpand(taskDtoResponse.getId()).toUri();
             logger.info("Returning updated Task: {}", taskDtoResponse);
             return ResponseEntity.ok().location(uri).body(taskDtoResponse);
         } catch (TaskNotFoundException ex) {
@@ -110,7 +119,7 @@ public class TaskController {
         }
     }
 
-    @DeleteMapping("/{taskId}")
+    @DeleteMapping("/delete/{taskId}")
     public ResponseEntity<Void> deleteTask(@PathVariable @NotNull Long taskId,
                                            BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
