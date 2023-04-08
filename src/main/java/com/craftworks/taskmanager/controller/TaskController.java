@@ -57,10 +57,7 @@ public class TaskController {
     @GetMapping("/{taskId}")
     public ResponseEntity<UpdateTaskDto> getTask(@PathVariable @NotNull Long taskId) {
         logger.info("Received request to get Task with id: {}", taskId);
-        /*if (bindingResult.hasErrors()) {
-            // Handle validation errors and return error response
-            return ResponseEntity.badRequest().build();
-        }*/
+
         try {
             UpdateTaskDto taskDto = taskService.getTaskById(taskId);
             logger.info("Returning Task: {}", taskDto);
@@ -74,8 +71,8 @@ public class TaskController {
 
     @PostMapping("/create")
     public ResponseEntity<UpdateTaskDto> createTask(@RequestBody @Valid CreateTaskDto taskDto,
-                                                    UriComponentsBuilder uriBuilder,
-                                                    BindingResult bindingResult) {
+                                                    BindingResult bindingResult,
+                                                    UriComponentsBuilder uriBuilder) {
         logger.info("Received request to create Task with id: {}", taskDto);
         // Handle validation errors and return error response
         if (bindingResult.hasErrors()) {

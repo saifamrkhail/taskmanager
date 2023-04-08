@@ -68,7 +68,9 @@ public class TaskService {
     public UpdateTaskDto createTask(CreateTaskDto taskDto) {
         UpdateTaskDto createdTaskDto;
         try {
-            Task task = taskRepository.save(taskMapper.createTaskDtoToEntity(taskDto, new Task()));
+            Task task = taskMapper.createTaskDtoToEntity(taskDto, new Task());
+            task.setCreatedAt(LocalDateTime.now());
+            task = taskRepository.save(task);
             task.setCreatedAt(LocalDateTime.now());
             createdTaskDto = taskMapper.toUpdateDto(task);
             logger.info("Created task: {}", createdTaskDto);
