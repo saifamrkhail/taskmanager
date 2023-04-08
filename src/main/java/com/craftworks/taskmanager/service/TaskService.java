@@ -8,6 +8,7 @@ import com.craftworks.taskmanager.exception.TaskNotFoundException;
 import com.craftworks.taskmanager.mapper.TaskMapper;
 import com.craftworks.taskmanager.repository.TaskRepository;
 import jakarta.persistence.EntityNotFoundException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -30,7 +32,7 @@ public class TaskService {
         this.taskRepository = taskRepository;
         this.taskMapper = taskMapper;
     }
-
+    @Transactional(readOnly = true)
     public List<TaskDto> getAllTasks() {
         try {
             Optional<List<Task>> tasks = Optional.of(taskRepository.findAll());
@@ -44,7 +46,7 @@ public class TaskService {
             throw new RuntimeException(ex.getMessage());
         }
     }
-
+    @Transactional(readOnly = true)
     public TaskDto getTaskById(Long taskId) {
         try {
             Optional<Task> task = taskRepository.findById(taskId);
@@ -60,7 +62,7 @@ public class TaskService {
             throw new TaskAccessException(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
+    @Transactional
     public TaskDto createTask(CreateTaskDto taskDto) {
         TaskDto createdTaskDto;
         try {
@@ -77,7 +79,7 @@ public class TaskService {
             throw new RuntimeException(ex.getMessage());
         }
     }
-
+    @Transactional
     public TaskDto updateTask(Long taskId, TaskDto taskDto) {
         Optional<Task> optionalTask = taskRepository.findById(taskId);
         if (optionalTask.isEmpty()) {
@@ -96,7 +98,7 @@ public class TaskService {
             throw new TaskAccessException(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
+    @Transactional
     public void deleteTask(Long taskId) {
         try {
             taskRepository.deleteById(taskId);

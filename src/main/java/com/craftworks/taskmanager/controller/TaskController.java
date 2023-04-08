@@ -16,13 +16,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 
 @RestController
-@RequestMapping("/task")
+@RequestMapping("/api/v1/tasks")
 public class TaskController {
     private final Logger logger = LoggerFactory.getLogger(TaskController.class);
     private final TaskService taskService;
@@ -32,16 +30,6 @@ public class TaskController {
     }
 
     @GetMapping
-    public ResponseEntity<Map<String, String>> home() {
-        logger.info("Received request to get home page");
-        Map<String, String> response = new HashMap<>();
-        response.put("message", "Welcome to Craftworks Task Manager");
-        response.put("getAllTasks", "/tasks");
-        logger.info("Returning home page");
-        return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/all")
     public ResponseEntity<List<TaskDto>> getAllTasks() {
         logger.info("Received request to get all tasks");
         try {
@@ -70,7 +58,7 @@ public class TaskController {
         }
     }
 
-    @PostMapping("/create")
+    @PostMapping
     public ResponseEntity<TaskDto> createTask(@RequestBody @Valid CreateTaskDto taskDto,
                                               BindingResult bindingResult,
                                               UriComponentsBuilder uriBuilder) {
@@ -92,7 +80,7 @@ public class TaskController {
         }
     }
 
-    @PutMapping("/update/{taskId}")
+    @PutMapping("/{taskId}")
     public ResponseEntity<TaskDto> updateTask(@PathVariable @NotNull Long taskId,
                                               @RequestBody @Valid TaskDto taskDto,
                                               BindingResult bindingResult,
@@ -117,7 +105,7 @@ public class TaskController {
         }
     }
 
-    @DeleteMapping("/delete/{taskId}")
+    @DeleteMapping("/{taskId}")
     public ResponseEntity<Void> deleteTask(@PathVariable @NotNull Long taskId) {
         logger.info("Received request to delete Task with id: {}", taskId);
         try {
