@@ -13,6 +13,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
+
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.net.URI;
@@ -54,30 +55,27 @@ public class TaskController {
     }
 
     @GetMapping("/{taskId}")
-    public ResponseEntity<UpdateTaskDto> getTask(@PathVariable @NotNull Long taskId,
-                                                 BindingResult bindingResult,
-                                                 UriComponentsBuilder uriBuilder) {
+    public ResponseEntity<UpdateTaskDto> getTask(@PathVariable @NotNull Long taskId) {
         logger.info("Received request to get Task with id: {}", taskId);
-        if (bindingResult.hasErrors()) {
+        /*if (bindingResult.hasErrors()) {
             // Handle validation errors and return error response
             return ResponseEntity.badRequest().build();
-        }
+        }*/
         try {
             UpdateTaskDto taskDto = taskService.getTaskById(taskId);
             logger.info("Returning Task: {}", taskDto);
-            URI uri = uriBuilder.path("/task/{taskId}").buildAndExpand(taskDto.getId()).toUri();
-            return ResponseEntity.ok().location(uri).body(taskDto);
+            return ResponseEntity.ok().body(taskDto);
         } catch (TaskNotFoundException ex) {
             return ResponseEntity.notFound().build();
-        }  catch (Exception ex) {
+        } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
     @PostMapping("/create")
     public ResponseEntity<UpdateTaskDto> createTask(@RequestBody @Valid CreateTaskDto taskDto,
-                                                    BindingResult bindingResult,
-                                                    UriComponentsBuilder uriBuilder) {
+                                                    UriComponentsBuilder uriBuilder,
+                                                    BindingResult bindingResult) {
         logger.info("Received request to create Task with id: {}", taskDto);
         // Handle validation errors and return error response
         if (bindingResult.hasErrors()) {
@@ -98,8 +96,8 @@ public class TaskController {
     @PutMapping("/update/{taskId}")
     public ResponseEntity<UpdateTaskDto> updateTask(@PathVariable @NotNull Long taskId,
                                                     @RequestBody @Valid UpdateTaskDto taskDto,
-                                                    BindingResult bindingResult,
-                                                    UriComponentsBuilder uriBuilder) {
+                                                    UriComponentsBuilder uriBuilder,
+                                                    BindingResult bindingResult) {
         logger.info("Received request to update Task with id: {}", taskId);
         //handle validation errors and return error response
         if (bindingResult.hasErrors()) {

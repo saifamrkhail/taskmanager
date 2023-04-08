@@ -28,7 +28,7 @@ public class CraftworksTaskScheduler {
 
     private final Random random = new Random();
 
-    @Scheduled(fixedDelay = 15000)
+    /*@Scheduled(fixedDelay = 15000)
     public void createTask() {
         Task task = new Task();
         task.setCreatedAt(LocalDateTime.now());
@@ -40,5 +40,5 @@ public class CraftworksTaskScheduler {
         task.setStatus(Status.IN_PROGRESS);
         taskRepository.save(task);
         logger.info("Created task: {}", task);
-    }
+    }*/
 }

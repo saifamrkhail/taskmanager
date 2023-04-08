@@ -16,6 +16,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -56,14 +57,11 @@ public class TaskService {
                 return taskMapper.toUpdateDto(task.get());
             } else {
                 logger.info("Task with id {} not found", taskId);
-                throw new TaskNotFoundException("Task with id:" + taskId + "not found", HttpStatus.NOT_FOUND);
+                throw new TaskNotFoundException("Task with id: " + taskId + " not found", HttpStatus.NOT_FOUND);
             }
         } catch (DataAccessException ex) {
-            logger.error("A DataAccessException occurred while creating task: {}", ex.getMessage());
+            logger.error("A DataAccessException occurred while retrieving task: {}", ex.getMessage());
             throw new TaskAccessException(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        } catch (Exception ex) {
-            logger.error("An error occurred while retrieving task with id: {} {}", taskId, ex.getMessage());
-            throw new RuntimeException(ex.getMessage());
         }
     }
 
@@ -71,6 +69,7 @@ public class TaskService {
         UpdateTaskDto createdTaskDto;
         try {
             Task task = taskRepository.save(taskMapper.createTaskDtoToEntity(taskDto, new Task()));
+            task.setCreatedAt(LocalDateTime.now());
             createdTaskDto = taskMapper.toUpdateDto(task);
             logger.info("Created task: {}", createdTaskDto);
             return createdTaskDto;

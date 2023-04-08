@@ -1,7 +1,7 @@
 package com.craftworks.taskmanager.enumeration;
 
 public enum Status {
-    WAITING,
+    OPEN,
     IN_PROGRESS,
     RESOLVED;
 }

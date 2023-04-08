@@ -35,5 +35,5 @@ docker-compose down
 ## PostgreSQL
 
 ```bash
-psql -h localhost -p 5432 -U sample -d sample
+docker-compose exec db psql -U task
 ```

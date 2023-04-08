@@ -10,7 +10,9 @@ import java.time.LocalDate;
 
 @Data
 public class CreateTaskDto {
+
     private LocalDate dueDate;
+
     @NotNull
     @Size(min = 1, max = 255)
     private String title;
