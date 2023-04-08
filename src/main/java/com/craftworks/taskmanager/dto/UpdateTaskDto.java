@@ -1,12 +1,12 @@
 package com.craftworks.taskmanager.dto;
 
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Future;
-import javax.validation.constraints.PastOrPresent;
-import javax.validation.constraints.Size;
 
 import com.craftworks.taskmanager.enumeration.Priority;
 import com.craftworks.taskmanager.enumeration.Status;
+import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PastOrPresent;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.time.LocalDate;

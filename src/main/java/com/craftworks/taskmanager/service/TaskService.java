@@ -37,9 +37,8 @@ public class TaskService {
         try {
             Optional<List<Task>> tasks = Optional.of(taskRepository.findAll());
             logger.info("Retrieving all tasks");
-            return tasks.get().stream()
-                    .map(taskMapper::toUpdateDto)
-                    .collect(Collectors.toList());
+            return taskMapper.taskListToUpdateTaskDtoList(tasks.get());
+            //return tasks.get().stream().map(taskMapper::).collect(Collectors.toList());
         } catch (DataAccessException ex) {
             logger.error("A DataAccessException occurred while getting all tasks: {}", ex.getMessage());
             throw new TaskAccessException("Failed to get all tasks", HttpStatus.INTERNAL_SERVER_ERROR);
@@ -54,10 +53,10 @@ public class TaskService {
             Optional<Task> task = taskRepository.findById(taskId);
             if (task.isPresent()) {
                 logger.info("Task found with id: {}", taskId);
-                return taskMapper.toUpdateDto(task.get());
+                return taskMapper.taskToUpdateTaskDto(task.get());
             } else {
-                logger.info("Task with id {} not found", taskId);
-                throw new TaskNotFoundException("Task with id: " + taskId + " not found", HttpStatus.NOT_FOUND);
+                logger.info("Task not found with id: {}", taskId);
+                throw new TaskNotFoundException("Task not found with id: " + taskId, HttpStatus.NOT_FOUND);
             }
         } catch (DataAccessException ex) {
             logger.error("A DataAccessException occurred while retrieving task: {}", ex.getMessage());
@@ -69,10 +68,8 @@ public class TaskService {
         UpdateTaskDto createdTaskDto;
         try {
             Task task = taskMapper.createTaskDtoToEntity(taskDto, new Task());
-            task.setCreatedAt(LocalDateTime.now());
             task = taskRepository.save(task);
-            task.setCreatedAt(LocalDateTime.now());
-            createdTaskDto = taskMapper.toUpdateDto(task);
+            createdTaskDto = taskMapper.taskToUpdateTaskDto(task);
             logger.info("Created task: {}", createdTaskDto);
             return createdTaskDto;
         } catch (DataAccessException ex) {
@@ -94,15 +91,12 @@ public class TaskService {
         task = taskMapper.updateTaskDtoToEntity(taskDto, task);
         try {
             task = taskRepository.save(task);
-            UpdateTaskDto updatedTaskDto = taskMapper.toUpdateDto(task);
+            UpdateTaskDto updatedTaskDto = taskMapper.taskToUpdateTaskDto(task);
             logger.info("Updated task with id: {}", taskId);
             return updatedTaskDto;
         } catch (DataAccessException ex) {
             logger.error("A DataAccessException occurred while updating task: {}", ex.getMessage());
             throw new TaskAccessException(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        } catch (Exception ex) {
-            logger.error("An error occurred while updating task: {}", ex.getMessage());
-            throw new RuntimeException(ex.getMessage());
         }
     }
 

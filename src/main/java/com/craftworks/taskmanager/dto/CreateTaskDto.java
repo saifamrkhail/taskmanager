@@ -2,15 +2,19 @@ package com.craftworks.taskmanager.dto;
 
 import com.craftworks.taskmanager.enumeration.Priority;
 import com.craftworks.taskmanager.enumeration.Status;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 public class CreateTaskDto {
 
+    private LocalDateTime createdAt;
     private LocalDate dueDate;
 
     @NotNull

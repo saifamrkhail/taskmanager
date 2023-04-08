@@ -5,6 +5,8 @@ import com.craftworks.taskmanager.dto.UpdateTaskDto;
 import com.craftworks.taskmanager.exception.TaskAccessException;
 import com.craftworks.taskmanager.exception.TaskNotFoundException;
 import com.craftworks.taskmanager.service.TaskService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -13,13 +15,11 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
-
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 
 @RestController
 @RequestMapping("/task")
@@ -55,13 +55,14 @@ public class TaskController {
     }
 
     @GetMapping("/{taskId}")
-    public ResponseEntity<UpdateTaskDto> getTask(@PathVariable @NotNull Long taskId) {
+    public ResponseEntity<UpdateTaskDto> getTask(@PathVariable @NotNull Long taskId,
+                                                 UriComponentsBuilder uriBuilder) {
         logger.info("Received request to get Task with id: {}", taskId);
-
         try {
             UpdateTaskDto taskDto = taskService.getTaskById(taskId);
             logger.info("Returning Task: {}", taskDto);
-            return ResponseEntity.ok().body(taskDto);
+            URI location = uriBuilder.path("/task/{taskId}").buildAndExpand(taskDto.getId()).toUri();
+            return ResponseEntity.ok().location(location).body(taskDto);
         } catch (TaskNotFoundException ex) {
             return ResponseEntity.notFound().build();
         } catch (Exception ex) {
@@ -86,6 +87,7 @@ public class TaskController {
             logger.info("Returning created Task: {}", createdTaskDto);
             return ResponseEntity.status(HttpStatus.CREATED).location(location).body(createdTaskDto);
         } catch (Exception ex) {
+            logger.error("An error occurred while creating task: {}", ex.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -93,8 +95,8 @@ public class TaskController {
     @PutMapping("/update/{taskId}")
     public ResponseEntity<UpdateTaskDto> updateTask(@PathVariable @NotNull Long taskId,
                                                     @RequestBody @Valid UpdateTaskDto taskDto,
-                                                    UriComponentsBuilder uriBuilder,
-                                                    BindingResult bindingResult) {
+                                                    BindingResult bindingResult,
+                                                    UriComponentsBuilder uriBuilder) {
         logger.info("Received request to update Task with id: {}", taskId);
         //handle validation errors and return error response
         if (bindingResult.hasErrors()) {
@@ -110,19 +112,14 @@ public class TaskController {
         } catch (TaskNotFoundException ex) {
             return ResponseEntity.notFound().build();
         } catch (Exception ex) {
+            logger.error("An error occurred while updating task: {}", ex.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(taskDto);
         }
     }
 
     @DeleteMapping("/delete/{taskId}")
-    public ResponseEntity<Void> deleteTask(@PathVariable @NotNull Long taskId,
-                                           BindingResult bindingResult) {
+    public ResponseEntity<Void> deleteTask(@PathVariable @NotNull Long taskId) {
         logger.info("Received request to delete Task with id: {}", taskId);
-        // Handle validation errors and return error response
-        if (bindingResult.hasErrors()) {
-            return ResponseEntity.badRequest().build();
-        }
-
         try {
             taskService.deleteTask(taskId);
             logger.info("Task with id: {} deleted successfully", taskId);
