@@ -20,25 +20,25 @@ public class CraftworksTaskScheduler {
     private final Logger logger = LoggerFactory.getLogger(CraftworksTaskScheduler.class);
 
     private final TaskRepository taskRepository;
+    private final Random random = new Random();
 
     @Autowired
     public CraftworksTaskScheduler(TaskRepository taskRepository) {
         this.taskRepository = taskRepository;
     }
 
-    private final Random random = new Random();
-
-    /*@Scheduled(fixedDelay = 15000)
+    @Scheduled(fixedDelay = 15000)
     public void createTask() {
         Task task = new Task();
         task.setCreatedAt(LocalDateTime.now());
-        task.setUpdatedAt(LocalDateTime.now());
-        task.setDueDate(LocalDate.now().plusDays(random.nextInt(7)));
-        task.setTitle("Sample task");
-        task.setDescription("This is a sample task");
-        task.setPriority(Priority.LOW);
-        task.setStatus(Status.IN_PROGRESS);
-        taskRepository.save(task);
+        task.setDueDate(LocalDate.now().plusDays(random.nextInt(10)));
+        task.setTitle("Task " + random.nextInt(100));
+        task.setDescription("Description " + random.nextInt(100));
+        task.setPriority(Priority.values()[random.nextInt(Priority.values().length)]);
+        task.setStatus(Status.values()[random.nextInt(Status.values().length)]);
+
+        task = taskRepository.save(task);
+
         logger.info("Created task: {}", task);
-    }*/
+    }
 }

@@ -1,7 +1,7 @@
 package com.craftworks.taskmanager.service;
 
 import com.craftworks.taskmanager.dto.CreateTaskDto;
-import com.craftworks.taskmanager.dto.UpdateTaskDto;
+import com.craftworks.taskmanager.dto.TaskDto;
 import com.craftworks.taskmanager.entity.Task;
 import com.craftworks.taskmanager.exception.TaskAccessException;
 import com.craftworks.taskmanager.exception.TaskNotFoundException;
@@ -16,10 +16,8 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class TaskService {
@@ -33,12 +31,11 @@ public class TaskService {
         this.taskMapper = taskMapper;
     }
 
-    public List<UpdateTaskDto> getAllTasks() {
+    public List<TaskDto> getAllTasks() {
         try {
             Optional<List<Task>> tasks = Optional.of(taskRepository.findAll());
             logger.info("Retrieving all tasks");
-            return taskMapper.taskListToUpdateTaskDtoList(tasks.get());
-            //return tasks.get().stream().map(taskMapper::).collect(Collectors.toList());
+            return taskMapper.taskListToTaskDtoList(tasks.get());
         } catch (DataAccessException ex) {
             logger.error("A DataAccessException occurred while getting all tasks: {}", ex.getMessage());
             throw new TaskAccessException("Failed to get all tasks", HttpStatus.INTERNAL_SERVER_ERROR);
@@ -48,12 +45,12 @@ public class TaskService {
         }
     }
 
-    public UpdateTaskDto getTaskById(Long taskId) {
+    public TaskDto getTaskById(Long taskId) {
         try {
             Optional<Task> task = taskRepository.findById(taskId);
             if (task.isPresent()) {
                 logger.info("Task found with id: {}", taskId);
-                return taskMapper.taskToUpdateTaskDto(task.get());
+                return taskMapper.taskToTaskDto(task.get());
             } else {
                 logger.info("Task not found with id: {}", taskId);
                 throw new TaskNotFoundException("Task not found with id: " + taskId, HttpStatus.NOT_FOUND);
@@ -64,12 +61,12 @@ public class TaskService {
         }
     }
 
-    public UpdateTaskDto createTask(CreateTaskDto taskDto) {
-        UpdateTaskDto createdTaskDto;
+    public TaskDto createTask(CreateTaskDto taskDto) {
+        TaskDto createdTaskDto;
         try {
             Task task = taskMapper.createTaskDtoToEntity(taskDto, new Task());
             task = taskRepository.save(task);
-            createdTaskDto = taskMapper.taskToUpdateTaskDto(task);
+            createdTaskDto = taskMapper.taskToTaskDto(task);
             logger.info("Created task: {}", createdTaskDto);
             return createdTaskDto;
         } catch (DataAccessException ex) {
@@ -81,17 +78,17 @@ public class TaskService {
         }
     }
 
-    public UpdateTaskDto updateTask(Long taskId, UpdateTaskDto taskDto) {
+    public TaskDto updateTask(Long taskId, TaskDto taskDto) {
         Optional<Task> optionalTask = taskRepository.findById(taskId);
         if (optionalTask.isEmpty()) {
             logger.error("Task not found: {}", taskDto);
             throw new TaskNotFoundException("Task not found", HttpStatus.NOT_FOUND);
         }
         Task task = optionalTask.get();
-        task = taskMapper.updateTaskDtoToEntity(taskDto, task);
+        task = taskMapper.taskDtoToEntity(taskDto, task);
         try {
             task = taskRepository.save(task);
-            UpdateTaskDto updatedTaskDto = taskMapper.taskToUpdateTaskDto(task);
+            TaskDto updatedTaskDto = taskMapper.taskToTaskDto(task);
             logger.info("Updated task with id: {}", taskId);
             return updatedTaskDto;
         } catch (DataAccessException ex) {

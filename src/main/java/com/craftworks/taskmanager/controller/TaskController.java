@@ -1,7 +1,7 @@
 package com.craftworks.taskmanager.controller;
 
 import com.craftworks.taskmanager.dto.CreateTaskDto;
-import com.craftworks.taskmanager.dto.UpdateTaskDto;
+import com.craftworks.taskmanager.dto.TaskDto;
 import com.craftworks.taskmanager.exception.TaskAccessException;
 import com.craftworks.taskmanager.exception.TaskNotFoundException;
 import com.craftworks.taskmanager.service.TaskService;
@@ -42,10 +42,10 @@ public class TaskController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<UpdateTaskDto>> getAllTasks() {
+    public ResponseEntity<List<TaskDto>> getAllTasks() {
         logger.info("Received request to get all tasks");
         try {
-            List<UpdateTaskDto> taskDtos = taskService.getAllTasks();
+            List<TaskDto> taskDtos = taskService.getAllTasks();
             logger.info("Returning all tasks");
             return ResponseEntity.ok(taskDtos);
         } catch (TaskAccessException ex) {
@@ -55,11 +55,11 @@ public class TaskController {
     }
 
     @GetMapping("/{taskId}")
-    public ResponseEntity<UpdateTaskDto> getTask(@PathVariable @NotNull Long taskId,
-                                                 UriComponentsBuilder uriBuilder) {
+    public ResponseEntity<TaskDto> getTask(@PathVariable @NotNull Long taskId,
+                                           UriComponentsBuilder uriBuilder) {
         logger.info("Received request to get Task with id: {}", taskId);
         try {
-            UpdateTaskDto taskDto = taskService.getTaskById(taskId);
+            TaskDto taskDto = taskService.getTaskById(taskId);
             logger.info("Returning Task: {}", taskDto);
             URI location = uriBuilder.path("/task/{taskId}").buildAndExpand(taskDto.getId()).toUri();
             return ResponseEntity.ok().location(location).body(taskDto);
@@ -71,9 +71,9 @@ public class TaskController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<UpdateTaskDto> createTask(@RequestBody @Valid CreateTaskDto taskDto,
-                                                    BindingResult bindingResult,
-                                                    UriComponentsBuilder uriBuilder) {
+    public ResponseEntity<TaskDto> createTask(@RequestBody @Valid CreateTaskDto taskDto,
+                                              BindingResult bindingResult,
+                                              UriComponentsBuilder uriBuilder) {
         logger.info("Received request to create Task with id: {}", taskDto);
         // Handle validation errors and return error response
         if (bindingResult.hasErrors()) {
@@ -82,7 +82,7 @@ public class TaskController {
         }
 
         try {
-            UpdateTaskDto createdTaskDto = taskService.createTask(taskDto);
+            TaskDto createdTaskDto = taskService.createTask(taskDto);
             URI location = uriBuilder.path("/task/{taskId}").buildAndExpand(createdTaskDto.getId()).toUri();
             logger.info("Returning created Task: {}", createdTaskDto);
             return ResponseEntity.status(HttpStatus.CREATED).location(location).body(createdTaskDto);
@@ -93,10 +93,10 @@ public class TaskController {
     }
 
     @PutMapping("/update/{taskId}")
-    public ResponseEntity<UpdateTaskDto> updateTask(@PathVariable @NotNull Long taskId,
-                                                    @RequestBody @Valid UpdateTaskDto taskDto,
-                                                    BindingResult bindingResult,
-                                                    UriComponentsBuilder uriBuilder) {
+    public ResponseEntity<TaskDto> updateTask(@PathVariable @NotNull Long taskId,
+                                              @RequestBody @Valid TaskDto taskDto,
+                                              BindingResult bindingResult,
+                                              UriComponentsBuilder uriBuilder) {
         logger.info("Received request to update Task with id: {}", taskId);
         //handle validation errors and return error response
         if (bindingResult.hasErrors()) {
@@ -105,7 +105,7 @@ public class TaskController {
         }
 
         try {
-            UpdateTaskDto taskDtoResponse = taskService.updateTask(taskId, taskDto);
+            TaskDto taskDtoResponse = taskService.updateTask(taskId, taskDto);
             URI uri = uriBuilder.path("/task/{taskId}").buildAndExpand(taskDtoResponse.getId()).toUri();
             logger.info("Returning updated Task: {}", taskDtoResponse);
             return ResponseEntity.ok().location(uri).body(taskDtoResponse);

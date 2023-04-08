@@ -13,7 +13,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
-public class UpdateTaskDto {
+public class TaskDto {
 
     @NotNull
     private Long id;
