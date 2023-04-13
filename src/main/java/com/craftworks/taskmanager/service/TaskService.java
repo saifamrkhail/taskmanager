@@ -50,14 +50,15 @@ public class TaskService {
      *     It delegates the request to the repository layer and returns the response to the controller.
      *     If any error occurs while getting the tasks, it returns an error response to the controller.
      *     If no tasks are found, it returns an empty list.
-     *     If tasks are found, it returns a list of tasks.
+     *     If tasks are found, it returns a sorted list of tasks.
+     *     The sorting is done by title in ascending order.
      * </p>
      * @return List of all tasks
      */
     @Transactional(readOnly = true)
     public List<TaskDto> getAllTasks() {
         try {
-            Optional<List<Task>> tasks = Optional.of(taskRepository.findAll(Sort.sort(Task.class)));
+            Optional<List<Task>> tasks = Optional.of(taskRepository.findAll(Sort.by(Sort.Direction.ASC, "title")));
             logger.info("Retrieving all tasks");
             return taskMapper.taskListToTaskDtoList(tasks.get());
         } catch (DataAccessException ex) {
