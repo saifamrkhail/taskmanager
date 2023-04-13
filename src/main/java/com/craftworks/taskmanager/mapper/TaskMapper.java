@@ -12,6 +12,9 @@ import org.mapstruct.factory.Mappers;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Mapper for the Task entity.
+ */
 @Mapper(componentModel = "spring")
 public interface TaskMapper {
 

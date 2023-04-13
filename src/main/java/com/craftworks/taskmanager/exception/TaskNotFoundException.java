@@ -2,6 +2,9 @@ package com.craftworks.taskmanager.exception;
 
 import org.springframework.http.HttpStatus;
 
+/**
+ * Exception for when a task cannot be found.
+ */
 public class TaskNotFoundException extends RuntimeException {
 
     private HttpStatus status;

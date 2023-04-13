@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +22,15 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Service of Taskmanagement System.
+ * <p>
+ *     This class is responsible for handling CRUD requests related to Task management system and delegating the request to the repository layer.
+ *     It handles the response to be sent back to the controller.
+ *     It also handles any exceptions that may occur while performing the operation.
+ *     It also handles any exceptions that may occur while performing the operation.
+ * </p>
+ */
 @Service
 public class TaskService {
     private final Logger logger = LoggerFactory.getLogger(TaskService.class);
@@ -32,10 +42,22 @@ public class TaskService {
         this.taskRepository = taskRepository;
         this.taskMapper = taskMapper;
     }
+
+    /**
+     * Get all tasks
+     * <p>
+     *     This method is responsible for handling GET request to get all tasks.
+     *     It delegates the request to the repository layer and returns the response to the controller.
+     *     If any error occurs while getting the tasks, it returns an error response to the controller.
+     *     If no tasks are found, it returns an empty list.
+     *     If tasks are found, it returns a list of tasks.
+     * </p>
+     * @return List of all tasks
+     */
     @Transactional(readOnly = true)
     public List<TaskDto> getAllTasks() {
         try {
-            Optional<List<Task>> tasks = Optional.of(taskRepository.findAll());
+            Optional<List<Task>> tasks = Optional.of(taskRepository.findAll(Sort.sort(Task.class)));
             logger.info("Retrieving all tasks");
             return taskMapper.taskListToTaskDtoList(tasks.get());
         } catch (DataAccessException ex) {
@@ -46,6 +68,19 @@ public class TaskService {
             throw new RuntimeException(ex.getMessage());
         }
     }
+
+    /**
+     * Get task by id
+     * <p>
+     *     This method is responsible for handling GET request to get a task by id.
+     *     It delegates the request to the repository layer and returns the response to the controller.
+     *     If any error occurs while getting the task, it returns an error response to the controller.
+     *     If no task is found, it returns an error response to the controller.
+     *     If task is found, it returns the task.
+     * </p>
+     * @param taskId Id of the task to be retrieved
+     * @return      Task with the given id
+     */
     @Transactional(readOnly = true)
     public TaskDto getTaskById(Long taskId) {
         try {
@@ -62,6 +97,18 @@ public class TaskService {
             throw new TaskAccessException(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    /**
+     * Create task
+     * <p>
+     *     This method is responsible for handling POST request to create a task.
+     *     It delegates the request to the repository layer and returns the response to the controller.
+     *     If any error occurs while creating the task, it returns an error response to the controller.
+     *     If task is created successfully, it returns the created task.
+     * </p>
+     * @param taskDto Task to be created
+     * @return        Created task
+     */
     @Transactional
     public TaskDto createTask(CreateTaskDto taskDto) {
         TaskDto createdTaskDto;
@@ -79,6 +126,20 @@ public class TaskService {
             throw new RuntimeException(ex.getMessage());
         }
     }
+
+    /**
+     * Update task
+     * <p>
+     *     This method is responsible for handling PUT request to update a task.
+     *     It delegates the request to the repository layer and returns the response to the controller.
+     *     If any error occurs while updating the task, it returns an error response to the controller.
+     *     If no task is found, it returns an error response to the controller.
+     *     If task is updated successfully, it returns the updated task.
+     * </p>
+     * @param taskId  Id of the task to be updated
+     * @param taskDto Task to be updated
+     * @return        Updated task
+     */
     @Transactional
     public TaskDto updateTask(Long taskId, TaskDto taskDto) {
         Optional<Task> optionalTask = taskRepository.findById(taskId);
@@ -98,6 +159,17 @@ public class TaskService {
             throw new TaskAccessException(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+    /**
+     * Delete task
+     * <p>
+     *     This method is responsible for handling DELETE request to delete a task.
+     *     It delegates the request to the repository layer and returns the response to the controller.
+     *     If any error occurs while deleting the task, it returns an error response to the controller.
+     *     If no task is found, it returns an error response to the controller.
+     *     If task is deleted successfully, it returns a success response to the controller.
+     * </p>
+     * @param taskId Id of the task to be deleted
+     */
     @Transactional
     public void deleteTask(Long taskId) {
         try {

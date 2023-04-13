@@ -11,7 +11,9 @@ import lombok.Data;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-
+/**
+ * Data Transfer Object for a task.
+ */
 @Data
 public class TaskDto {
 

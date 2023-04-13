@@ -14,6 +14,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Random;
 
+/**
+ * Scheduler for creating random tasks in a fixed intervall of 15000 miliseconds.
+ */
 @Component
 public class CraftworksTaskScheduler {
 
