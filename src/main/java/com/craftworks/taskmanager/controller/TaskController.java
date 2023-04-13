@@ -18,7 +18,13 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URI;
 import java.util.List;
 
-
+/**
+ * Controller class for Taskmanagement System
+ * <p>
+ *     This class is responsible for handling CRUD requests related to Task management system and delegating the request to the service layer.
+ *     It handles the response to be sent back to the client.
+ * </p>
+ */
 @RestController
 @RequestMapping("/api/v1/tasks")
 public class TaskController {
@@ -29,6 +35,17 @@ public class TaskController {
         this.taskService = taskService;
     }
 
+    /**
+     * Get all tasks
+     * <p>
+     *     This method is responsible for handling GET request to get all tasks.
+     *     It delegates the request to the service layer and returns the response to the client.
+     *     If any error occurs while getting the tasks, it returns an error response to the client.
+     *     If no tasks are found, it returns an empty list.
+     *     If tasks are found, it returns a list of tasks.
+     * </p>
+     * @return List of all tasks
+     */
     @GetMapping
     public ResponseEntity<List<TaskDto>> getAllTasks() {
         logger.info("Received request to get all tasks");
@@ -42,6 +59,21 @@ public class TaskController {
         }
     }
 
+    /**
+     * Get task by id
+     * <p>
+     *     This method is responsible for handling GET request to get a task by id.
+     *     It delegates the request to the service layer and returns the response to the client.
+     *     If any error occurs while getting the task, it returns an error response to the client.
+     *     If no task is found, it returns a not found response to the client.
+     *     If task is found, it returns the task.
+     *     It also returns the location of the task in the response header.
+     * </p>
+     *
+     * @param taskId        Id of the task to be retrieved
+     * @param uriBuilder    UriBuilder to build the location of the task
+     * @return              Task with the given id
+     */
     @GetMapping("/{taskId}")
     public ResponseEntity<TaskDto> getTask(@PathVariable @NotNull Long taskId,
                                            UriComponentsBuilder uriBuilder) {
@@ -58,6 +90,21 @@ public class TaskController {
         }
     }
 
+    /**
+     * Create a task
+     * <p>
+     *     This method is responsible for handling POST request to create a task.
+     *     It delegates the request to the service layer and returns the response to the client.
+     *     If any error occurs while creating the task, it returns an error response to the client.
+     *     If task is created successfully, it returns the created task.
+     *     It also returns the location of the task in the response header.
+     *     It handles validation errors and returns a bad request response to the client in case of a invalid task.
+     * </p>
+     * @param taskDto           Task to be created
+     * @param bindingResult     BindingResult to handle validation errors
+     * @param uriBuilder        UriBuilder to build the location of the task
+     * @return                  Created task
+     */
     @PostMapping
     public ResponseEntity<TaskDto> createTask(@RequestBody @Valid CreateTaskDto taskDto,
                                               BindingResult bindingResult,
@@ -80,6 +127,23 @@ public class TaskController {
         }
     }
 
+    /**
+     * Update a task
+     * <p>
+     *     This method is responsible for handling PUT request to update a task.
+     *     It delegates the request to the service layer and returns the response to the client.
+     *     If any error occurs while updating the task, it returns an error response to the client.
+     *     If no task is found, it returns a not found response to the client.
+     *     If task is updated successfully, it returns the updated task.
+     *     It also returns the location of the task in the response header.
+     *     It handles validation errors and returns a bad request response to the client in case of a invalid task.
+     * </p>
+     * @param taskId        Id of the task to be updated
+     * @param taskDto       Task to be updated
+     * @param bindingResult BindingResult to handle validation errors
+     * @param uriBuilder    UriBuilder to build the location of the task
+     * @return              Updated task
+     */
     @PutMapping("/{taskId}")
     public ResponseEntity<TaskDto> updateTask(@PathVariable @NotNull Long taskId,
                                               @RequestBody @Valid TaskDto taskDto,
@@ -105,6 +169,18 @@ public class TaskController {
         }
     }
 
+    /**
+     * Delete a task
+     * <p>
+     *     This method is responsible for handling DELETE request to delete a task.
+     *     It delegates the request to the service layer and returns the response to the client.
+     *     If any error occurs while deleting the task, it returns an error response to the client.
+     *     If no task is found, it returns a not found response to the client.
+     *     If task is deleted successfully, it returns a void response.
+     * </p>
+     * @param taskId    Id of the task to be deleted
+     * @return          Empty response
+     */
     @DeleteMapping("/{taskId}")
     public ResponseEntity<Void> deleteTask(@PathVariable @NotNull Long taskId) {
         logger.info("Received request to delete Task with id: {}", taskId);
